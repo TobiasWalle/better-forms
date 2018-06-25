@@ -1,10 +1,20 @@
 import { NgModule } from '@angular/core';
-import { BetterFormsLibComponent } from './better-forms-lib.component';
+import { DefaultValueAccessorDirective } from './directives/default-value-accessor.directive';
+import { FormDirective } from './directives/form.directive';
+import { NameDirective } from './directives/name.directive';
 
 @NgModule({
-  imports: [
+  imports: [],
+  declarations: [
+    NameDirective,
+    FormDirective,
+    DefaultValueAccessorDirective
   ],
-  declarations: [BetterFormsLibComponent],
-  exports: [BetterFormsLibComponent]
+  exports: [
+    NameDirective,
+    FormDirective,
+    DefaultValueAccessorDirective
+  ]
 })
-export class BetterFormsLibModule { }
+export class BetterFormsLibModule {
+}

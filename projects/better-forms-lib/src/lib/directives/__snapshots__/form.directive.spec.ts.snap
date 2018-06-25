@@ -1,0 +1,5 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`FormDirective should throw an error if the betterForm input is not set 1`] = `"The Input \\"betterForm\\" is required"`;
+
+exports[`FormDirective should throw error if valueAccessor is registered twice 1`] = `"Value Accessor with name \\"age\\" already registered"`;

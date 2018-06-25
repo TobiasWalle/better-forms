@@ -1,4 +1,9 @@
 import { Component } from '@angular/core';
+import { BetterForm } from '../../projects/better-forms-lib/src/lib/models/better-form';
+
+interface User {
+  firstName: string;
+}
 
 @Component({
   selector: 'app-root',
@@ -6,5 +11,9 @@ import { Component } from '@angular/core';
   styleUrls: ['./app.component.css']
 })
 export class AppComponent {
-  title = 'app';
+  form = new BetterForm<User>({
+    initialValue: {
+      firstName: 'Tobias'
+    }
+  });
 }

@@ -1,0 +1,9 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`NameDirective #ngOnInit should throw an error if name is not set 1`] = `"The \\"betterFormName\\" Input is required"`;
+
+exports[`NameDirective #ngOnInit should throw an error if name is not set 2`] = `"The \\"betterFormName\\" Input is required"`;
+
+exports[`NameDirective should throw an error if the value accessors are null or empty 1`] = `"No ValueAccessor found"`;
+
+exports[`NameDirective should throw an error if the value accessors are null or empty 2`] = `"No ValueAccessor found"`;
