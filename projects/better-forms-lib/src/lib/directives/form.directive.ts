@@ -70,7 +70,7 @@ export class FormDirective implements OnInit, OnDestroy {
       });
   }
 
-  private getForm(): BetterForm {
+  private getForm(): BetterForm<any> {
     if (this.betterForm == null) {
       throw new Error('The Input "betterForm" is required');
     }

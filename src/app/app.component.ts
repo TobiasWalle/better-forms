@@ -2,7 +2,11 @@ import { Component } from '@angular/core';
 import { BetterForm } from '../../projects/better-forms-lib/src/lib/models/better-form';
 
 interface User {
-  firstName: string;
+  name: {
+    first: string;
+    last: string;
+  };
+  age: number;
 }
 
 @Component({
@@ -13,7 +17,16 @@ interface User {
 export class AppComponent {
   form = new BetterForm<User>({
     initialValue: {
-      firstName: 'Tobias'
+      name: {
+        first: 'Max',
+        last: 'Mustermann',
+      },
+      age: 20
     }
   });
+
+  constructor() {
+    this.form.valueChange.subscribe(newValue => console.log(newValue));
+    this.form.onUpdate.subscribe(update => console.log(update));
+  }
 }
