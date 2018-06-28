@@ -15,7 +15,7 @@ interface User {
   styleUrls: ['./app.component.css']
 })
 export class AppComponent {
-  form = new BetterForm<User>({
+  public form = new BetterForm<User>({
     initialValue: {
       name: {
         first: 'Max',
