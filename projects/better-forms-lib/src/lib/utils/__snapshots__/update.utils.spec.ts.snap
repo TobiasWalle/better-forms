@@ -1,0 +1,7 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`getByPath should throw error if the path does not exists 1`] = `
+"Couldn't find \\"a,c\\" on object. \\"c\\" does not exists on {
+  \\"b\\": 1
+}."
+`;

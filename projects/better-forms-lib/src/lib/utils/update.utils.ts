@@ -9,7 +9,7 @@ export function getByPath<T>(object: T, path: string[]): any {
     if (key in nextObject) {
       return nextObject[key];
     }
-    throw new Error(`Couldn't find "${path}" on object. "${key}" doesn not exists on ${nextObject}.`);
+    throw new Error(`Couldn't find "${path}" on object. "${key}" does not exists on ${JSON.stringify(nextObject, null, 2)}.`);
   }, object);
 }
 

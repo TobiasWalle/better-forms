@@ -1,0 +1,7 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`BetterForm #getByPath should throw an error if the value does not exists 1`] = `
+"Couldn't find \\"b,d\\" on object. \\"d\\" does not exists on {
+  \\"c\\": \\"test\\"
+}."
+`;
