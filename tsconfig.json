@@ -29,5 +29,8 @@
         "dist/better-forms-lib/*"
       ]
     }
-  }
+  },
+  "include": [
+    "**/*"
+  ]
 }
