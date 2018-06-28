@@ -131,7 +131,7 @@
         "build": {
           "builder": "@angular-devkit/build-ng-packagr:build",
           "options": {
-            "tsConfig": "projects/better-forms-lib/tsconfig.lib.json",
+            "tsConfig": "projects/better-forms-lib/tsconfig.json",
             "project": "projects/better-forms-lib/ng-package.json"
           },
           "configurations": {
@@ -152,7 +152,7 @@
           "builder": "@angular-devkit/build-angular:tslint",
           "options": {
             "tsConfig": [
-              "projects/better-forms-lib/tsconfig.lib.json",
+              "projects/better-forms-lib/tsconfig.json",
               "projects/better-forms-lib/tsconfig.spec.json"
             ],
             "exclude": [
