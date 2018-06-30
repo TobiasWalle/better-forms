@@ -40,8 +40,8 @@ describe('FormDirective', () => {
 
     const firstName = createMockValueAccessor();
     const age = createMockValueAccessor();
-    directive.registerControlValueAccessor('name.first', firstName);
-    directive.registerControlValueAccessor('age', age);
+    directive.register('name.first', firstName);
+    directive.register('age', age);
 
     expect(firstName.writeValue).toHaveBeenCalledWith('Michael');
     expect(age.writeValue).toHaveBeenCalledWith(30);
@@ -61,7 +61,7 @@ describe('FormDirective', () => {
     expect(firstName.writeValue).toHaveBeenCalledTimes(2);
     expect(age.writeValue).toHaveBeenCalledTimes(2);
 
-    directive.unregisterControlValueAccessor('age');
+    directive.unregister('age');
 
     await directive.betterForm.updatePath(['age'], 20);
 
@@ -72,8 +72,8 @@ describe('FormDirective', () => {
     directive.ngOnInit();
 
     const age = createMockValueAccessor();
-    directive.registerControlValueAccessor('age', age);
+    directive.register('age', age);
 
-    expect(() => directive.registerControlValueAccessor('age', age)).toThrowErrorMatchingSnapshot();
+    expect(() => directive.register('age', age)).toThrowErrorMatchingSnapshot();
   });
 });

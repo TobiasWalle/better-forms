@@ -7,8 +7,8 @@ describe('NameDirective', () => {
   let directive!: NameDirective;
 
   const mockForm: FormDirective = {
-    registerControlValueAccessor: jest.fn(),
-    unregisterControlValueAccessor: jest.fn(),
+    register: jest.fn(),
+    unregister: jest.fn(),
   } as any;
   const mockValueAccessors: ControlValueAccessor[] = [
     createMockValueAccessor()
@@ -36,7 +36,7 @@ describe('NameDirective', () => {
       directive.betterFormName = 'my-name';
       directive.ngOnInit();
 
-      expect(mockForm.registerControlValueAccessor).toHaveBeenCalledWith('my-name', mockValueAccessors[0]);
+      expect(mockForm.register).toHaveBeenCalledWith('my-name', mockValueAccessors[0]);
     });
 
     it('should throw an error if name is not set', () => {
@@ -51,7 +51,7 @@ describe('NameDirective', () => {
       directive.betterFormName = 'my-name';
       directive.ngOnDestroy();
 
-      expect(mockForm.unregisterControlValueAccessor).toHaveBeenCalledWith('my-name');
+      expect(mockForm.unregister).toHaveBeenCalledWith('my-name');
     });
 
     it('should throw an error if name is not set', () => {

@@ -21,12 +21,12 @@ export class NameDirective implements OnInit, OnDestroy {
 
   /** @inheritDoc */
   public ngOnInit(): void {
-    this.form.registerControlValueAccessor(this.getName(), this.valueAccessor);
+    this.form.register(this.getName(), this.valueAccessor);
   }
 
   /** @inheritDoc */
   public ngOnDestroy(): void {
-    this.form.unregisterControlValueAccessor(this.getName());
+    this.form.unregister(this.getName());
   }
 
   private getName(): string {

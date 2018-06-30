@@ -35,7 +35,7 @@ export class FormDirective implements OnInit, OnDestroy {
    * @param {string} name The name of the value accessor.
    * @param {ControlValueAccessor} valueAccessor The valueAccessor to set for the name
    */
-  public registerControlValueAccessor(name: string, valueAccessor: ControlValueAccessor): void {
+  public register(name: string, valueAccessor: ControlValueAccessor): void {
     if (this.valueAccessors[name]) {
       throw new Error(`Value Accessor with name "${name}" already registered`);
     }
@@ -49,7 +49,7 @@ export class FormDirective implements OnInit, OnDestroy {
    * Remove a registered value accessor.
    * @param {string} name The name of the value accessor to remove.
    */
-  public unregisterControlValueAccessor(name: string): void {
+  public unregister(name: string): void {
     this.valueAccessors[name].registerOnChange(emptyFunction);
     delete this.valueAccessors[name];
   }
