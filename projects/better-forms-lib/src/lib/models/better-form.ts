@@ -1,5 +1,5 @@
 import { AbstractControl, ValidationErrors, Validator } from '@angular/forms';
-import { BehaviorSubject, Observable, Subject } from 'rxjs';
+import { AsyncSubject, BehaviorSubject, Observable, Subject } from 'rxjs';
 import { shallowMergeObjects } from '../utils/shallow-merge-objects';
 import { splitName } from '../utils/split-name';
 import { getByPath, setImmutable } from '../utils/update.utils';
@@ -17,6 +17,7 @@ export interface UpdateInformation {
 
 export interface BetterFormOptions<T> {
   initialValue: T;
+  validationSchema?: Record<string, NgValidator[]>;
 }
 
 export class BetterForm<T> {
@@ -45,18 +46,44 @@ export class BetterForm<T> {
   private errorsSubject = new BehaviorSubject(this._errors);
   public errorsChange: Observable<Errors> = this.errorsSubject.asObservable();
 
-  private validationsFunctions: Record<string, NgValidator[]> = {};
+  private registeredValidationFunctions: Record<string, NgValidator[]> = {};
+  private schemaValidationFunctions: Readonly<Record<string, NgValidator[]>> = {};
 
+  private get validationFunctions(): Readonly<Record<string, NgValidator[]>> {
+    const keys = new Set([
+      ...Object.keys(this.registeredValidationFunctions),
+      ...Object.keys(this.schemaValidationFunctions),
+    ]);
+    const result: Record<string, NgValidator[]> = {};
+    keys.forEach(key => {
+      result[key] = [
+        ...(this.registeredValidationFunctions[key] || []),
+        ...(this.schemaValidationFunctions[key] || []),
+      ];
+    });
+    return result;
+  }
 
   /** The current form value */
   public get value(): T {
     return this._value;
   }
 
+  private isReadySubject = new Subject<void>();
+  public isReady = this.isReadySubject.toPromise();
+
   constructor(options: BetterFormOptions<T>) {
     this._value = options.initialValue;
     this.valueSubject = new BehaviorSubject<T>(options.initialValue);
     this.valueChange = this.valueSubject.asObservable();
+    this.schemaValidationFunctions = options.validationSchema || {};
+    this.triggerInitialUpdates();
+  }
+
+  private async triggerInitialUpdates(): Promise<void> {
+    await this.updateValidationErrors([]);
+    this.isReadySubject.next();
+    this.isReadySubject.complete();
   }
 
   /** Override the current form value with a new one */
@@ -98,7 +125,7 @@ export class BetterForm<T> {
    * @param {NgValidator[]} validators The validators to set
    */
   public async setValidators(path: string[], validators: NgValidator[]): Promise<void> {
-    this.validationsFunctions[path.join('.')] = validators;
+    this.registeredValidationFunctions[path.join('.')] = validators;
     await this.updateValidationErrors(path);
   }
 
@@ -108,16 +135,16 @@ export class BetterForm<T> {
    */
   public removeValidators(path: string[]): void {
     const name = path.join('.');
-    delete this.validationsFunctions[name];
+    delete this.registeredValidationFunctions[name];
     delete this._errors[name];
   }
 
   private async updateValidationErrors(pathPrefix: string[]): Promise<void> {
     const namePrefix = pathPrefix.join('.');
     await Promise.all(
-      Object.keys(this.validationsFunctions)
+      Object.keys(this.validationFunctions)
       .filter((name: string) => name.startsWith(namePrefix))
-      .map(name => ({name, validators: this.validationsFunctions[name]}))
+      .map(name => ({name, validators: this.validationFunctions[name]}))
       .map(async ({name, validators}) => {
         const error = await validateAll(this.getByPath(splitName(name)), validators);
         if (error) {

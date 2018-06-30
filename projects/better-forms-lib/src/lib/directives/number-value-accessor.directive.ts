@@ -16,10 +16,16 @@ export const NUMBER_VALUE_ACCESSOR = {
 export class NumberValueAccessorDirective extends DefaultValueAccessorDirective {
   @HostListener('input', ['$event'])
   public handleInput(event: KeyboardEvent): void {
-    const value = (event.target as any).value;
-    if (value !== '') {
-      (this as any)._handleInput(value);
+    const target: HTMLInputElement = event.target as any;
+    let value: string | null = target.value;
+    if (value === '') {
+      if (target.validity.badInput) {
+        return;
+      } else {
+        value = null;
+      }
     }
+    (this as any)._handleInput(value);
   }
 
   /** @inheritDoc */

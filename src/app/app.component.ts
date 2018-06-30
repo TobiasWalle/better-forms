@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { Validators } from '@angular/forms';
 import { BetterForm } from '../../projects/better-forms-lib/src/lib/models/better-form';
 
 interface User {
@@ -22,6 +23,11 @@ export class AppComponent {
         last: 'Mustermann',
       },
       age: 20
+    },
+    validationSchema: {
+      'name.first': [ Validators.required ],
+      'name.last': [ Validators.required ],
+      'age': [ Validators.required ],
     }
   });
 

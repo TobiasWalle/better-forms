@@ -1,7 +1,7 @@
-import { AsyncValidator, Validator } from '@angular/forms';
+import { AsyncValidator, AsyncValidatorFn, Validator, ValidatorFn } from '@angular/forms';
 import { getLatestValue } from '../utils/test.utils';
 import { BetterForm, Errors } from './better-form';
-import { AsyncNgValidator, SyncNgValidator } from './ng-validators';
+import { SyncNgValidator } from './ng-validators';
 
 interface TestValue {
   a?: number;
@@ -9,6 +9,20 @@ interface TestValue {
     c: string;
   };
 }
+
+const greater5: ValidatorFn = (control) => (control.value > 5 ? null : { greater5: 'Has to be greater 5' });
+const smaller3: ValidatorFn = (control) => (control.value < 3 ? null : { smaller3: 'Has to be smaller 3' });
+const isString: ValidatorFn = (control) => (typeof control.value === 'string' ? null : { isString: 'Has to be string' });
+
+const makeAsync = (func: ValidatorFn): AsyncValidatorFn => control => new Promise(
+  resolve => setTimeout(
+    () => {
+      resolve(func(control));
+    },
+    10
+  ));
+const asyncGreater5: AsyncValidatorFn = makeAsync(greater5);
+const asyncIsString: AsyncValidatorFn = makeAsync(isString);
 
 describe('BetterForm', () => {
   const initialValue: TestValue = Object.freeze({
@@ -21,6 +35,29 @@ describe('BetterForm', () => {
 
   beforeEach(() => {
     form = new BetterForm({ initialValue });
+  });
+
+  describe('#init', () => {
+    it('should be initializable with validation schema', async () => {
+      form = new BetterForm({
+        initialValue: {
+          a: 2,
+          b: {
+            c: 0 as any
+          }
+        },
+        validationSchema: {
+          'a': [greater5],
+          'b.c': [isString]
+        }
+      });
+      await form.isReady;
+
+      expect(form.errors).toEqual({
+        'a': { greater5: 'Has to be greater 5' },
+        'b.c': { isString: 'Has to be string' },
+      });
+    });
   });
 
   describe('#value', () => {
@@ -97,7 +134,7 @@ describe('BetterForm', () => {
   });
 
   describe('#errorsChange', () => {
-    const equal1Error = { greater1: 'The value has to be grater 1' };
+    const equal1Error = { greater1: 'The value has to be greater 1' };
     const equal1: SyncNgValidator = control => control.value === 1 ? null : equal1Error;
 
     async function expectErrorChangeToBeTriggeredWith(errors: Errors) {
@@ -156,25 +193,13 @@ describe('BetterForm', () => {
   });
 
   describe('#errors & #setValidators & #removeValidators', () => {
-    const greater5: SyncNgValidator = (control) => (control.value > 5 ? null : { greater5: 'Has to be grater 5' });
-    const isString: SyncNgValidator = (control) => (typeof control.value === 'string' ? null : { isString: 'Has to be string' });
-
-    const makeAsync = (func: SyncNgValidator): AsyncNgValidator => control => new Promise(
-      resolve => setTimeout(
-        () => {
-          resolve(func(control));
-        },
-        10
-      ));
-    const asyncGreater5 = makeAsync(greater5);
-    const asyncIsString = makeAsync(isString);
 
     it('should validate', async () => {
       await form.setValidators(['a'], [greater5, isString]);
 
       expect(form.errors).toEqual({
         'a': {
-          greater5: 'Has to be grater 5',
+          greater5: 'Has to be greater 5',
           isString: 'Has to be string'
         }
       });
@@ -192,6 +217,29 @@ describe('BetterForm', () => {
       expect(form.errors).toEqual({});
     });
 
+    it('should work in combination with schema', async () => {
+      form = new BetterForm({
+        initialValue: {
+          a: 4,
+          b: {
+            c: 0 as any
+          }
+        },
+        validationSchema: {
+          'a': [smaller3],
+        }
+      });
+      await form.setValidators(['a'], [greater5, isString]);
+
+      expect(form.errors).toEqual({
+        'a': {
+          greater5: 'Has to be greater 5',
+          smaller3: 'Has to be smaller 3',
+          isString: 'Has to be string'
+        }
+      });
+    });
+
     it('should work with validator objects', async () => {
       const validate: Validator = {
         validate: greater5,
@@ -201,7 +249,7 @@ describe('BetterForm', () => {
 
       expect(form.errors).toEqual({
         'a': {
-          greater5: 'Has to be grater 5',
+          greater5: 'Has to be greater 5',
         }
       });
     });
@@ -211,7 +259,7 @@ describe('BetterForm', () => {
 
       expect(form.errors).toEqual({
         'a': {
-          greater5: 'Has to be grater 5',
+          greater5: 'Has to be greater 5',
           isString: 'Has to be string'
         }
       });
@@ -231,14 +279,14 @@ describe('BetterForm', () => {
 
     it('should work with async validator objects', async () => {
       const validate: AsyncValidator = {
-        validate: asyncGreater5,
+        validate: asyncGreater5 as any,
       };
 
       await form.setValidators(['a'], [validate]);
 
       expect(form.errors).toEqual({
         'a': {
-          greater5: 'Has to be grater 5',
+          greater5: 'Has to be greater 5',
         }
       });
     });

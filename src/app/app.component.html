@@ -1,5 +1,9 @@
 <form [betterForm]="form">
-  <input type="text" betterFormName="name.first" required/>
-  <input type="text" betterFormName="name.last" required/>
+  <input type="text" betterFormName="name.first"/>
+  <input type="text" betterFormName="name.last"/>
   <input type="number" betterFormName="age"/>
 </form>
+
+<pre>
+  {{form.errors | json}}
+</pre>
