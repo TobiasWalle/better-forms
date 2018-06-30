@@ -35,7 +35,7 @@ describe('FormDirective', () => {
     expect(() => directive.ngOnInit()).toThrowErrorMatchingSnapshot();
   });
 
-  it('should register value accessors, update values and unregister', () => {
+  it('should register value accessors, update values and unregister', async () => {
     directive.ngOnInit();
 
     const firstName = createMockValueAccessor();
@@ -48,14 +48,14 @@ describe('FormDirective', () => {
     expect(firstName.writeValue).toHaveBeenCalledTimes(1);
     expect(age.writeValue).toHaveBeenCalledTimes(1);
 
-    directive.betterForm.updatePath(['age'], 21);
+    await directive.betterForm.updatePath(['age'], 21);
 
     expect(age.writeValue).toHaveBeenCalledWith(21);
     expect(firstName.writeValue).toHaveBeenCalledTimes(1);
     expect(age.writeValue).toHaveBeenCalledTimes(2);
 
-    directive.betterForm.updatePath(['name', 'first'], 'Test');
-    directive.betterForm.updatePath(['name', 'last'], 'LastName');
+    await directive.betterForm.updatePath(['name', 'first'], 'Test');
+    await directive.betterForm.updatePath(['name', 'last'], 'LastName');
 
     expect(firstName.writeValue).toHaveBeenCalledWith('Test');
     expect(firstName.writeValue).toHaveBeenCalledTimes(2);
@@ -63,7 +63,8 @@ describe('FormDirective', () => {
 
     directive.unregisterControlValueAccessor('age');
 
-    directive.betterForm.updatePath(['age'], 20);
+    await directive.betterForm.updatePath(['age'], 20);
+
     expect(age.writeValue).toHaveBeenCalledTimes(2);
   });
 

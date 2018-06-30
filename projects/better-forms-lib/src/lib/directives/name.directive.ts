@@ -1,5 +1,5 @@
 import { Directive, Host, Inject, Input, OnDestroy, OnInit, Optional, Self } from '@angular/core';
-import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
+import { ControlValueAccessor, NG_VALIDATORS, NG_VALUE_ACCESSOR, Validator, ValidatorFn } from '@angular/forms';
 import { FormDirective } from './form.directive';
 
 @Directive({
@@ -14,6 +14,7 @@ export class NameDirective implements OnInit, OnDestroy {
   constructor(
     @Host() private form: FormDirective,
     @Optional() @Self() @Inject(NG_VALUE_ACCESSOR) valueAccessors: ControlValueAccessor[] | null,
+    @Optional() @Self() @Inject(NG_VALIDATORS) validators: (Validator | ValidatorFn)[] | null,
   ) {
     this.valueAccessor = selectValueAccessor(valueAccessors);
   }

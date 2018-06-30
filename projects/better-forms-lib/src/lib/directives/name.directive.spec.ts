@@ -17,7 +17,8 @@ describe('NameDirective', () => {
   beforeEach(() => {
     directive = new NameDirective(
       mockForm,
-      mockValueAccessors
+      mockValueAccessors,
+      null
     );
   });
 
@@ -26,8 +27,8 @@ describe('NameDirective', () => {
   });
 
   it('should throw an error if the value accessors are null or empty', () => {
-    expect(() => new NameDirective(mockForm, null)).toThrowErrorMatchingSnapshot();
-    expect(() => new NameDirective(mockForm, [])).toThrowErrorMatchingSnapshot();
+    expect(() => new NameDirective(mockForm, null, null)).toThrowErrorMatchingSnapshot();
+    expect(() => new NameDirective(mockForm, [], null)).toThrowErrorMatchingSnapshot();
   });
 
   describe('#ngOnInit', () => {
