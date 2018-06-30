@@ -1,4 +1,5 @@
 import { BetterForm } from '../models/better-form';
+import { SyncNgValidator } from '../models/ng-validators';
 import { createMockValueAccessor } from '../utils/test.utils';
 import { FormDirective } from './form.directive';
 
@@ -40,8 +41,8 @@ describe('FormDirective', () => {
 
     const firstName = createMockValueAccessor();
     const age = createMockValueAccessor();
-    directive.register('name.first', firstName);
-    directive.register('age', age);
+    await directive.register('name.first', firstName, []);
+    await directive.register('age', age, []);
 
     expect(firstName.writeValue).toHaveBeenCalledWith('Michael');
     expect(age.writeValue).toHaveBeenCalledWith(30);
@@ -61,19 +62,41 @@ describe('FormDirective', () => {
     expect(firstName.writeValue).toHaveBeenCalledTimes(2);
     expect(age.writeValue).toHaveBeenCalledTimes(2);
 
-    directive.unregister('age');
+    await directive.unregister('age');
 
     await directive.betterForm.updatePath(['age'], 20);
 
     expect(age.writeValue).toHaveBeenCalledTimes(2);
   });
 
-  it('should throw error if valueAccessor is registered twice', () => {
+  it('should throw error if valueAccessor is registered twice', async () => {
     directive.ngOnInit();
 
     const age = createMockValueAccessor();
-    directive.register('age', age);
+    await directive.register('age', age, []);
 
-    expect(() => directive.register('age', age)).toThrowErrorMatchingSnapshot();
+    await expect(directive.register('age', age, [])).rejects.toThrowErrorMatchingSnapshot();
+  });
+
+  it('should validate', async () => {
+    directive.ngOnInit();
+
+    const age = createMockValueAccessor();
+    const greater40: SyncNgValidator = control => control.value > 40 ? null : { greater40: 'Value has to be greater 40' };
+    await directive.register('age', age, [greater40]);
+
+    expect(directive.betterForm.errors.age).toEqual({ greater40: 'Value has to be greater 40' });
+
+    await directive.betterForm.updatePath(['age'], 50);
+
+    expect(directive.betterForm.errors.age).toBeUndefined();
+
+    await directive.betterForm.updatePath(['age'], 20);
+
+    expect(directive.betterForm.errors.age).toEqual({ greater40: 'Value has to be greater 40' });
+
+    await directive.unregister('age');
+
+    expect(directive.betterForm.errors.age).toBeUndefined();
   });
 });

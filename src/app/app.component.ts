@@ -26,7 +26,8 @@ export class AppComponent {
   });
 
   constructor() {
-    this.form.valueChange.subscribe(newValue => console.log(newValue));
-    this.form.onUpdate.subscribe(update => console.log(update));
+    this.form.valueChange.subscribe(newValue => {
+      console.log(newValue, this.form.errors);
+    });
   }
 }

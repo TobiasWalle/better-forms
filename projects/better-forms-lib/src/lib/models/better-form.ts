@@ -6,7 +6,7 @@ import { getByPath, setImmutable } from '../utils/update.utils';
 import { NgValidator } from './ng-validators';
 import { resolveAsync } from './resolve-async';
 
-export type Errors = Record<string, Record<string, ValidationErrors>>;
+export type Errors = Record<string, Record<string, ValidationErrors> | undefined>;
 
 export interface UpdateInformation {
   /** The path that has been updated */
@@ -21,6 +21,7 @@ export interface BetterFormOptions<T> {
 
 export class BetterForm<T> {
   private valueSubject: BehaviorSubject<T>;
+  private _value: T;
   public valueChange: Observable<T>;
 
   private onUpdateSubject: Subject<UpdateInformation> = new Subject<UpdateInformation>();
@@ -41,15 +42,19 @@ export class BetterForm<T> {
   }
 
   private _errors: Errors = {};
-  private validationsFunctions: Record<string, NgValidator> = {};
+  private errorsSubject = new BehaviorSubject(this._errors);
+  public errorsChange: Observable<Errors> = this.errorsSubject.asObservable();
+
+  private validationsFunctions: Record<string, NgValidator[]> = {};
 
 
   /** The current form value */
   public get value(): T {
-    return this.valueSubject.value;
+    return this._value;
   }
 
   constructor(options: BetterFormOptions<T>) {
+    this._value = options.initialValue;
     this.valueSubject = new BehaviorSubject<T>(options.initialValue);
     this.valueChange = this.valueSubject.asObservable();
   }
@@ -81,8 +86,9 @@ export class BetterForm<T> {
 
   private async triggerUpdate(path: string[], newValue: any): Promise<void> {
     const newFormValue = setImmutable(this.value, path, newValue);
-    this.valueSubject.next(newFormValue);
+    this._value = newFormValue;
     await this.updateValidationErrors(path);
+    this.valueSubject.next(newFormValue);
     this.onUpdateSubject.next({ path, newValue });
   }
 
@@ -113,9 +119,15 @@ export class BetterForm<T> {
       .filter((name: string) => name.startsWith(namePrefix))
       .map(name => ({name, validators: this.validationsFunctions[name]}))
       .map(async ({name, validators}) => {
-        this._errors[name] = await validateAll(this.getByPath(splitName(name)), validators);
+        const error = await validateAll(this.getByPath(splitName(name)), validators);
+        if (error) {
+          this._errors[name] = error;
+        } else {
+          delete this._errors[name];
+        }
       })
     );
+    this.errorsSubject.next(this._errors);
   }
 }
 

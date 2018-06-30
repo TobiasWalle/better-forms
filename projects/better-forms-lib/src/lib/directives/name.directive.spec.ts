@@ -32,17 +32,17 @@ describe('NameDirective', () => {
   });
 
   describe('#ngOnInit', () => {
-    it('should register with name', () => {
+    it('should register with name', async () => {
       directive.betterFormName = 'my-name';
-      directive.ngOnInit();
+      await directive.ngOnInit();
 
-      expect(mockForm.register).toHaveBeenCalledWith('my-name', mockValueAccessors[0]);
+      expect(mockForm.register).toHaveBeenCalledWith('my-name', mockValueAccessors[0], []);
     });
 
-    it('should throw an error if name is not set', () => {
+    it('should throw an error if name is not set', async () => {
       directive.betterFormName = undefined;
 
-      expect(() => directive.ngOnInit()).toThrowErrorMatchingSnapshot();
+      await expect(directive.ngOnInit()).rejects.toThrowErrorMatchingSnapshot();
     });
   });
 

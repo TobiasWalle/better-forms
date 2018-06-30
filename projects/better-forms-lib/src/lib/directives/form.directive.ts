@@ -2,6 +2,7 @@ import { Directive, Input, OnDestroy, OnInit } from '@angular/core';
 import { ControlValueAccessor } from '@angular/forms';
 import { Subject } from 'rxjs';
 import { BetterForm } from '../models/better-form';
+import { NgValidator } from '../models/ng-validators';
 import { splitName } from '../utils/split-name';
 
 @Directive({
@@ -34,29 +35,34 @@ export class FormDirective implements OnInit, OnDestroy {
    * Register a new value accessor for the form
    * @param {string} name The name of the value accessor.
    * @param {ControlValueAccessor} valueAccessor The valueAccessor to set for the name
+   * @param {NgValidator[]} validators An array with validators of the control
    */
-  public register(name: string, valueAccessor: ControlValueAccessor): void {
+  public async register(name: string, valueAccessor: ControlValueAccessor, validators: NgValidator[]): Promise<void> {
     if (this.valueAccessors[name]) {
       throw new Error(`Value Accessor with name "${name}" already registered`);
     }
 
     valueAccessor.registerOnChange((newValue: any) => this.onValueChange(name, newValue));
     this.valueAccessors[name] = valueAccessor;
-    this.updateValueAccessors(splitName(name));
+    const path = splitName(name);
+    await this.getForm().setValidators(path, validators);
+    this.updateValueAccessors(path);
   }
 
   /**
    * Remove a registered value accessor.
    * @param {string} name The name of the value accessor to remove.
    */
-  public unregister(name: string): void {
+  public async unregister(name: string): Promise<void> {
+    const path = splitName(name);
+    this.getForm().removeValidators(path);
     this.valueAccessors[name].registerOnChange(emptyFunction);
     delete this.valueAccessors[name];
   }
 
-  private onValueChange(name: string, newValue: any): void {
+  private async onValueChange(name: string, newValue: any): Promise<void> {
     const path = splitName(name);
-    this.getForm().updatePath(path, newValue);
+    await this.getForm().updatePath(path, newValue);
   }
 
   private updateValueAccessors(updatedPath: string[] = []): void {

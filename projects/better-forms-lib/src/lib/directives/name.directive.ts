@@ -1,5 +1,6 @@
 import { Directive, Host, Inject, Input, OnDestroy, OnInit, Optional, Self } from '@angular/core';
-import { ControlValueAccessor, NG_VALIDATORS, NG_VALUE_ACCESSOR, Validator, ValidatorFn } from '@angular/forms';
+import { ControlValueAccessor, NG_ASYNC_VALIDATORS, NG_VALIDATORS, NG_VALUE_ACCESSOR } from '@angular/forms';
+import { NgValidator, SyncNgValidator } from '../models/ng-validators';
 import { FormDirective } from './form.directive';
 
 @Directive({
@@ -10,18 +11,24 @@ export class NameDirective implements OnInit, OnDestroy {
   public betterFormName?: string;
 
   private readonly valueAccessor: ControlValueAccessor;
+  private readonly validators: NgValidator[];
 
   constructor(
     @Host() private form: FormDirective,
     @Optional() @Self() @Inject(NG_VALUE_ACCESSOR) valueAccessors: ControlValueAccessor[] | null,
-    @Optional() @Self() @Inject(NG_VALIDATORS) validators: (Validator | ValidatorFn)[] | null,
+    @Optional() @Self() @Inject(NG_VALIDATORS) validators: SyncNgValidator[] | null,
+    @Optional() @Self() @Inject(NG_ASYNC_VALIDATORS) asyncValidators: SyncNgValidator[] | null,
   ) {
     this.valueAccessor = selectValueAccessor(valueAccessors);
+    this.validators = [
+      ...(validators || []),
+      ...(asyncValidators || [])
+    ];
   }
 
   /** @inheritDoc */
-  public ngOnInit(): void {
-    this.form.register(this.getName(), this.valueAccessor);
+  public async ngOnInit(): Promise<void> {
+    await this.form.register(this.getName(), this.valueAccessor, this.validators);
   }
 
   /** @inheritDoc */

@@ -1,11 +1,11 @@
 import { AsyncValidator, Validator } from '@angular/forms';
 import { getLatestValue } from '../utils/test.utils';
-import { BetterForm } from './better-form';
+import { BetterForm, Errors } from './better-form';
 import { AsyncNgValidator, SyncNgValidator } from './ng-validators';
 
 interface TestValue {
   a?: number;
-  b: {
+  b?: {
     c: string;
   };
 }
@@ -55,7 +55,7 @@ describe('BetterForm', () => {
     });
 
     it('should not throw an error if the path does not exists', () => {
-      expect(() => form.updatePath(['b', 'd'], 'update')).not.toThrowError();
+      return expect(form.updatePath(['b', 'd'], 'update')).resolves.toBe(undefined);
     });
   });
 
@@ -93,6 +93,33 @@ describe('BetterForm', () => {
       await form.updatePath(['b', 'c'], 'c');
 
       await expectValueChangeToBeTriggeredWith(newValue);
+    });
+  });
+
+  describe('#errorsChange', () => {
+    const equal1Error = { greater1: 'The value has to be grater 1' };
+    const equal1: SyncNgValidator = control => control.value === 1 ? null : equal1Error;
+
+    async function expectErrorChangeToBeTriggeredWith(errors: Errors) {
+      expect(await getLatestValue(form.errorsChange)).toEqual(errors);
+    }
+
+    it('should trigger on setValue', async () => {
+      await form.setValidators(['a'], [equal1]);
+      await expectErrorChangeToBeTriggeredWith({});
+
+      await form.setValue({ a: 2 });
+
+      await expectErrorChangeToBeTriggeredWith({ a: equal1Error });
+    });
+
+    it('should trigger on register validator', async () => {
+      await form.setValue({ a: 2 });
+      await expectErrorChangeToBeTriggeredWith({});
+
+      await form.setValidators(['a'], [equal1]);
+
+      await expectErrorChangeToBeTriggeredWith({ a: equal1Error });
     });
   });
 
